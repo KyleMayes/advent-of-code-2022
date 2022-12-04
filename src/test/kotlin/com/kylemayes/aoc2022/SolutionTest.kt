@@ -4,6 +4,7 @@ import com.kylemayes.aoc2022.common.ResourceInput
 import com.kylemayes.aoc2022.common.Solution
 import com.kylemayes.aoc2022.day1.Day1
 import com.kylemayes.aoc2022.day2.Day2
+import com.kylemayes.aoc2022.day3.Day3
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.params.ParameterizedTest
@@ -16,6 +17,7 @@ class SolutionTest {
     private fun solutionsParameters(): Stream<Arguments> = Stream.of(
         Arguments.of("day1.txt", Day1(), 67016, 200116),
         Arguments.of("day2.txt", Day2(), 10310, 14859),
+        Arguments.of("day3.txt", Day3(), 8109, 2738),
     )
 
     @ParameterizedTest
