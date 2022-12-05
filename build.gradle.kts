@@ -19,9 +19,14 @@ dependencies {
     implementation("org.apache.commons:commons-lang3:3.12.0")
     implementation("org.apache.commons:commons-math3:3.6.1")
     implementation("com.github.ajalt:mordant:1.2.1")
-    implementation("com.google.guava:guava:31.0.1-jre")
+    implementation("com.google.code.gson:gson:2.10")
+    implementation("com.google.guava:guava:31.1-jre")
     testImplementation(platform("org.junit:junit-bom:5.8.2"))
     testImplementation("org.junit.jupiter:junit-jupiter")
+}
+
+application {
+    applicationDefaultJvmArgs = listOf("-ea")
 }
 
 tasks.withType<KotlinCompile> {

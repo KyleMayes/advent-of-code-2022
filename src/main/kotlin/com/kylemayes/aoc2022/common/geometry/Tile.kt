@@ -27,6 +27,19 @@ class Tile<T> : Cloneable {
         this.cells = MutableList(width * height) { tile[it / width][it % width] }
     }
 
+    constructor(tile: List<List<T>>, default: (point: Point) -> T) {
+        assert(tile.isNotEmpty() && tile[0].isNotEmpty())
+
+        val width = tile.maxOf { it.size }
+        val height = tile.size
+
+        bounds = Rectangle(Point(0, 0), Point(width - 1, height - 1))
+        this.cells = MutableList(width * height) {
+            val point = Point(it % width, it / width)
+            tile.getOrNull(point.y)?.getOrNull(point.x) ?: default(point)
+        }
+    }
+
     constructor(width: Int, height: Int, cell: (point: Point) -> T) : this(
         width,
         height,

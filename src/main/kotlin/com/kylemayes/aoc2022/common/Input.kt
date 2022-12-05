@@ -23,13 +23,13 @@ data class ResourceInput(private val resource: String) : Input {
 }
 
 /** Reads this input as a list of groups of consecutive non-empty lines. */
-fun Input.readGroups(): List<List<String>> = readLines(true)
+fun Input.readGroups(trim: Boolean = true): List<List<String>> = readLines(true, trim)
     .groups { it.isEmpty() }
     .filter { (empty, _) -> !empty }
     .map { (_, chunk) -> chunk }
 
 /** Reads this input as a list of (by default non-empty) lines. */
-fun Input.readLines(empty: Boolean = false): List<String> = read()
+fun Input.readLines(empty: Boolean = false, trim: Boolean = true): List<String> = read()
     .split("\n")
-    .map { it.trim() }
+    .map { if (trim) { it.trim() } else { it } }
     .filter { empty || it.isNotEmpty() }
