@@ -93,7 +93,7 @@ class Day7 : Solution<ParsedInput> {
                     }
                 }
                 is Command.Ls -> command.entries.forEach { entry ->
-                    when(entry) {
+                    when (entry) {
                         is Entry.File -> path.last().files[entry.name] = entry.bytes
                         is Entry.Dir -> path.last().directories.computeIfAbsent(entry.name) { Dir(entry.name) }
                     }

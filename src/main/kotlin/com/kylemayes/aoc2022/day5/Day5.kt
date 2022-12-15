@@ -24,6 +24,7 @@ class Day5 : Solution<ParsedInput> {
             .dropLast(1)
             .map { it.chunked(4).map { c -> c[1] } }
         val stacks = Tile(crates) { ' ' }
+            .values()
             .columns()
             .map { it.filter { c -> c != ' ' }.reversed().toMutableList() }
 

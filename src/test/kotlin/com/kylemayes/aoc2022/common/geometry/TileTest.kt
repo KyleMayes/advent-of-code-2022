@@ -64,7 +64,7 @@ class TileTest {
 
         assertEquals(
             listOf(Pair(Point(0, 0), 'a')),
-            one.entries().toList(),
+            one.entries().all().toList(),
         )
 
         assertEquals(
@@ -76,7 +76,7 @@ class TileTest {
                 Pair(Point(1, 1), 'e'),
                 Pair(Point(2, 1), 'f'),
             ),
-            six.entries().toList(),
+            six.entries().all().toList(),
         )
 
         assertEquals(
@@ -152,27 +152,27 @@ class TileTest {
     fun vectors() {
         val tile = "ab\ncd\nef".toTile()
 
-        assertThrows<AssertionError> { tile.row(-1) }
-        assertThrows<AssertionError> { tile.row(3) }
+        assertThrows<AssertionError> { tile.values().row(-1) }
+        assertThrows<AssertionError> { tile.values().row(3) }
 
-        assertEquals(listOf('a', 'b'), tile.row(0))
-        assertEquals(listOf('c', 'd'), tile.row(1))
-        assertEquals(listOf('e', 'f'), tile.row(2))
+        assertEquals(listOf('a', 'b'), tile.values().row(0))
+        assertEquals(listOf('c', 'd'), tile.values().row(1))
+        assertEquals(listOf('e', 'f'), tile.values().row(2))
 
-        assertThrows<AssertionError> { tile.column(-1) }
-        assertThrows<AssertionError> { tile.column(2) }
+        assertThrows<AssertionError> { tile.values().column(-1) }
+        assertThrows<AssertionError> { tile.values().column(2) }
 
-        assertEquals(listOf('a', 'c', 'e'), tile.column(0))
-        assertEquals(listOf('b', 'd', 'f'), tile.column(1))
+        assertEquals(listOf('a', 'c', 'e'), tile.values().column(0))
+        assertEquals(listOf('b', 'd', 'f'), tile.values().column(1))
 
         assertEquals(
             listOf(listOf('a', 'b'), listOf('c', 'd'), listOf('e', 'f')),
-            tile.rows(),
+            tile.values().rows(),
         )
 
         assertEquals(
             listOf(listOf('a', 'c', 'e'), listOf('b', 'd', 'f')),
-            tile.columns(),
+            tile.values().columns(),
         )
     }
 

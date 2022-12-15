@@ -47,7 +47,7 @@ class Tile<T> : Cloneable {
     )
 
     /** Returns this tile as a field. */
-    fun toField(): Field<T> = HashMap(entries().associate { it })
+    fun toField(): Field<T> = HashMap(entries().all().associate { it })
 
     // ===========================================
     // Read / Write
@@ -67,52 +67,27 @@ class Tile<T> : Cloneable {
         cells[(point.y * bounds.width) + point.x] = value
     }
 
-    /** Returns a sequence of the entries in this tile. */
-    fun entries(): Sequence<Pair<Point, T>> =
-        bounds.points().map { it to this[it] }
-
     /** Returns the neighbors of an entry in this tile. */
-    fun neighbors(point: Point, diagonal: Boolean = true): List<Pair<Point, T>> {
-        assert(bounds.contains(point)) { "$point outside of tile bounds ($bounds)." }
-        return point
-            .neighbors(diagonal)
-            .filter { bounds.contains(it) }
-            .map { it to this[it] }
-    }
+    fun neighbors(point: Point, diagonal: Boolean = true): List<Pair<Point, T>> =
+        bounds.neighbors(point, diagonal).map { it to this[it] }
 
     /** Writes the entries from a tile onto this tile. */
     fun blit(offset: Point, other: Tile<T>) {
-        for ((point, value) in other.entries()) {
+        for ((point, value) in other.entries().all()) {
             this[point + offset] = value
         }
     }
 
     /** Returns this tile as a string where each row is a line and each value is a character. */
     fun render(render: (value: T) -> Char): String =
-        rows().joinToString("\n") { it.joinToString("") { v -> render(v).toString() } }
+        values().rows().joinToString("\n") { it.joinToString("") { v -> render(v).toString() } }
 
     // ===========================================
     // Vectors
     // ===========================================
 
-    /** Returns the values in a row in this tile. */
-    fun row(y: Int): List<T> {
-        assert(y >= 0 && y < bounds.height) { "Row $y outside of tile bounds ($bounds)." }
-        val start = y * bounds.width
-        return cells.slice(start until start + bounds.width)
-    }
-
-    /** Returns the values in a column in this tile. */
-    fun column(x: Int): List<T> {
-        assert(x >= 0 && x < bounds.width) { "Column $x outside of tile bounds ($bounds)." }
-        return (0 until bounds.height).map { cells[(it * bounds.width) + x] }
-    }
-
-    /** Returns the rows in this tile. */
-    fun rows(): List<List<T>> = cells.chunked(bounds.width)
-
-    /** Returns the columns in this tile. */
-    fun columns(): List<List<T>> = List(bounds.width) { column(it) }
+    fun values() = TileValues(bounds, cells)
+    fun entries() = TileEntries(values())
 
     // ===========================================
     // Transforms
@@ -125,9 +100,9 @@ class Tile<T> : Cloneable {
     /** Merges this tile and the supplied tile into a new tile horizontally. */
     fun mergeX(right: Tile<T>): Tile<T> {
         assert(bounds.height == right.bounds.height) { "Tile heights are not equal." }
-        val width = bounds.width + right.bounds.width
         val cells = mutableListOf<T>()
-        rows().zip(right.rows()).forEach { cells.addAll(it.first); cells.addAll(it.second) }
+        values().rows().zip(right.values().rows()).forEach { cells.addAll(it.first); cells.addAll(it.second) }
+        val width = bounds.width + right.bounds.width
         return Tile(width, bounds.height, cells)
     }
 
@@ -139,10 +114,18 @@ class Tile<T> : Cloneable {
     }
 
     /** Flips this tile into a new tile horizontally. */
-    fun flipX() = Tile(bounds.width, bounds.height, rows().map { it.reversed() }.flatten())
+    fun flipX(): Tile<T> = Tile(
+        bounds.width,
+        bounds.height,
+        values().rows().map { it.reversed() }.flatten(),
+    )
 
     /** Flips this tile into a new tile vertically. */
-    fun flipY() = Tile(bounds.width, bounds.height, rows().reversed().flatten())
+    fun flipY(): Tile<T> = Tile(
+        bounds.width,
+        bounds.height,
+        values().rows().reversed().flatten(),
+    )
 
     /** Rotates this tile into a new tile clockwise. */
     @Suppress("NAME_SHADOWING")
@@ -194,14 +177,85 @@ class Tile<T> : Cloneable {
         .toHashCode()
 
     override fun toString(): String {
-        val rows = rows().joinToString { "[${it.joinToString()}]" }
+        val rows = values().rows().joinToString { "[${it.joinToString()}]" }
         return "Tile($rows)"
     }
 }
 
+data class TileValues<T>(internal val bounds: Rectangle, internal val cells: List<T>) {
+    /** Returns the values in the tile. */
+    fun all(): List<T> = cells
+
+    /** Returns a row in the tile. */
+    fun row(y: Int): List<T> {
+        assert(y >= 0 && y < bounds.height) { "Row $y outside of tile bounds ($bounds)." }
+        val start = y * bounds.width
+        return cells.slice(start until start + bounds.width)
+    }
+
+    /** Returns a column in the tile. */
+    fun column(x: Int): List<T> {
+        assert(x >= 0 && x < bounds.width) { "Column $x outside of tile bounds ($bounds)." }
+        return (0 until bounds.height).map { cells[(it * bounds.width) + x] }
+    }
+
+    /** Returns the rows in the tile. */
+    fun rows(): List<List<T>> = cells.chunked(bounds.width)
+
+    /** Returns the columns in the tile. */
+    fun columns(): List<List<T>> = List(bounds.width) { column(it) }
+
+    fun rays(point: Point, diagonal: Boolean = false): List<Pair<Direction, List<T>>> = Direction
+        .values()
+        .filter { diagonal || !it.diagonal }
+        .map { d ->
+            d to generateSequence(point) { it + d.delta }
+                .takeWhile { bounds.contains(it) }
+                .map { cells[(it.y * bounds.width) + it.x] }
+                .toList()
+        }
+}
+
+data class TileEntries<T>(private val values: TileValues<T>) {
+    /** Returns the entries in the tile. */
+    fun all(): List<Pair<Point, T>> = values
+        .cells
+        .withIndex()
+        .map { (i, v) -> Point(i % values.bounds.width, i / values.bounds.width) to v }
+
+    /** Returns a row in the tile. */
+    fun row(y: Int): List<Pair<Point, T>> = values
+        .row(y)
+        .withIndex()
+        .map { (x, v) -> Point(x, y) to v }
+
+    /** Returns a column in the tile. */
+    fun column(x: Int): List<Pair<Point, T>> = values
+        .column(x)
+        .withIndex()
+        .map { (y, v) -> Point(x, y) to v }
+
+    /** Returns the rows in the tile. */
+    fun rows(): List<List<Pair<Point, T>>> = List(values.bounds.height) { row(it) }
+
+    /** Returns the columns in the tile. */
+    fun columns(): List<List<Pair<Point, T>>> = List(values.bounds.width) { column(it) }
+
+    fun rays(point: Point, diagonal: Boolean = false): List<Pair<Direction, List<Pair<Point, T>>>> =
+        Direction
+            .values()
+            .filter { diagonal || !it.diagonal }
+            .map { d ->
+                d to generateSequence(point) { it + d.delta }
+                    .takeWhile { values.bounds.contains(it) }
+                    .map { it to values.cells[(it.y * values.bounds.width) + it.x] }
+                    .toList()
+            }
+}
+
 /** Returns these strings as a tile of characters where each string is a row. */
 fun List<String>.toTile(): Tile<Char> {
-    assert(size > 0 && this[0].isNotEmpty())
+    assert(isNotEmpty() && this[0].isNotEmpty())
 
     val width = this[0].length
     val height = size
@@ -218,7 +272,7 @@ fun String.toTile(): Tile<Char> =
 fun <T> List<String>.toTile(separator: Regex = Regex("\\s+"), transform: (String) -> T): Tile<T> {
     val values = this.map { it.split(separator).map(transform) }
 
-    assert(size > 0 && values[0].isNotEmpty())
+    assert(isNotEmpty() && values[0].isNotEmpty())
 
     val width = values[0].size
     val height = size

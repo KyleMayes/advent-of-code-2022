@@ -25,5 +25,11 @@ data class Rectangle(val topLeft: Point, val bottomRight: Point) {
         }
     }
 
+    /** Returns the neighbors of a point in this tile. */
+    fun neighbors(point: Point, diagonal: Boolean = true): List<Point> {
+        assert(contains(point)) { "$point outside of bounds ($this)." }
+        return point.neighbors(diagonal).filter { contains(it) }
+    }
+
     override fun toString() = "Rectangle($topLeft → $bottomRight)"
 }
