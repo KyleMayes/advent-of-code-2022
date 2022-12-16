@@ -10,6 +10,7 @@ import com.kylemayes.aoc2022.day5.Day5
 import com.kylemayes.aoc2022.day6.Day6
 import com.kylemayes.aoc2022.day7.Day7
 import com.kylemayes.aoc2022.day8.Day8
+import com.kylemayes.aoc2022.day9.Day9
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.params.ParameterizedTest
@@ -28,6 +29,7 @@ class SolutionTest {
         Arguments.of("day6.txt", Day6(), 1282, 3513),
         Arguments.of("day7.txt", Day7(), 1449447L, 8679207L),
         Arguments.of("day8.txt", Day8(), 1676, 313200),
+        Arguments.of("day9.txt", Day9(), 6023, 2533),
     )
 
     @ParameterizedTest
