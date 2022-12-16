@@ -3,6 +3,7 @@ package com.kylemayes.aoc2022
 import com.kylemayes.aoc2022.common.ResourceInput
 import com.kylemayes.aoc2022.common.Solution
 import com.kylemayes.aoc2022.day1.Day1
+import com.kylemayes.aoc2022.day10.Day10
 import com.kylemayes.aoc2022.day2.Day2
 import com.kylemayes.aoc2022.day3.Day3
 import com.kylemayes.aoc2022.day4.Day4
@@ -30,6 +31,13 @@ class SolutionTest {
         Arguments.of("day7.txt", Day7(), 1449447L, 8679207L),
         Arguments.of("day8.txt", Day8(), 1676, 313200),
         Arguments.of("day9.txt", Day9(), 6023, 2533),
+        Arguments.of("day10.txt", Day10(), 13860,
+            "###..####.#..#.####..##....##..##..###..\n" +
+            "#..#....#.#..#.#....#..#....#.#..#.#..#.\n" +
+            "#..#...#..####.###..#.......#.#....###..\n" +
+            "###...#...#..#.#....#.##....#.#....#..#.\n" +
+            "#.#..#....#..#.#....#..#.#..#.#..#.#..#.\n" +
+            "#..#.####.#..#.#.....###..##...##..###.."),
     )
 
     @ParameterizedTest
